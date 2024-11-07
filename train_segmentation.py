@@ -64,6 +64,8 @@ class LitUnsupervisedSegmenter(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         # training_step defined the train loop.
         # It is independent of forward
+        current_step = self.global_step
+        print(f"Current Step: {current_step}")
 
         with torch.no_grad():
             img = batch["img"]
