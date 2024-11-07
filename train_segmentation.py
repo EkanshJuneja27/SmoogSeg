@@ -176,8 +176,7 @@ class LitUnsupervisedSegmenter(pl.LightningModule):
             for k, v in tb_metrics.items():
                 print(k, ': ', v)
             self.log_dict(tb_metrics, sync_dist=True)
-
-
+print(ekansh)
 @hydra.main(config_path="configs", config_name="train_config.yaml", version_base='1.1')
 def my_app(cfg: DictConfig) -> None:
     OmegaConf.set_struct(cfg, False)
