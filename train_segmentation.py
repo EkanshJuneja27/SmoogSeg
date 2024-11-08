@@ -99,10 +99,18 @@ class LitUnsupervisedSegmenter(pl.LightningModule):
 
         return loss
 
+    # def configure_optimizers(self):
+    #     optimizer = torch.optim.Adam([{'params': list(self.projection.parameters()), 'lr': self.cfg.lr1},
+    #                                   {'params': list(self.prediction.parameters()), 'lr': self.cfg.lr2}])
+    #     return optimizer
+
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam([{'params': list(self.projection.parameters()), 'lr': self.cfg.lr1},
-                                      {'params': list(self.prediction.parameters()), 'lr': self.cfg.lr2}])
-        return optimizer
+        optimizer = torch.optim.Adam([
+            {'params': list(self.projection.parameters()), 'lr': self.cfg.lr1, 'weight_decay': 1e-5},
+            {'params': list(self.prediction.parameters()), 'lr': self.cfg.lr2, 'weight_decay': 1e-5}
+        ])
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+        return [optimizer], [scheduler]
 
     def on_train_start(self):
         tb_metrics = {
