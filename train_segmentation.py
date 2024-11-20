@@ -109,8 +109,10 @@ class LitUnsupervisedSegmenter(pl.LightningModule):
             {'params': list(self.projection.parameters()), 'lr': self.cfg.lr1, 'weight_decay': 1e-5},
             {'params': list(self.prediction.parameters()), 'lr': self.cfg.lr2, 'weight_decay': 1e-5}
         ])
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
-        return [optimizer], [scheduler]
+        def poly_lr_scheduler(step, max_steps, power=2.0):
+            return (1-step/max_steps)**power
+        scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda step: poly_lr_scheduler(step, self.cfg.max_steps))
+        return [optimizer], [scheduler]
 
     def on_train_start(self):
         tb_metrics = {
