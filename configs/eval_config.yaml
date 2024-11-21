@@ -13,8 +13,10 @@ use_ddp: False
 #  - "checkpoints/cocostuff27_dino_small.ckpt"
  # - "checkpoints/cityscapes_dino_small.ckpt"
 #   - "checkpoints/potsdam_dino_vit_base.ckpt"
-model_paths:
-  - "/kaggle/input/potsdam_dino_vit_base.ckpt"
+# model_paths:
+#   - "/kaggle/input/potsdam_dino_vit_base.ckpt"
+  model_paths:
+  - "/kaggle/working/input/checkpoints/potsdam_exp1.ckpt"
 
 hydra:
   run:
