@@ -112,7 +112,7 @@ class LitUnsupervisedSegmenter(pl.LightningModule):
         def poly_lr_scheduler(step, max_steps, power=2.0):
             return (1-step/max_steps)**power
         scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda step: poly_lr_scheduler(step, self.cfg.max_steps))
-        return [optimizer], [scheduler]
+        return [optimizer], [scheduler]
 
     def on_train_start(self):
         tb_metrics = {
