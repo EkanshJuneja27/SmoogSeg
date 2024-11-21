@@ -280,7 +280,7 @@ def my_app(cfg: DictConfig) -> None:
         callbacks=[
             ModelCheckpoint(
                 dirpath=join(checkpoint_dir),  # Directory for saving checkpoints
-                filename=f"{name}",  # Constant filename with prefix and timestamp
+                filename="potsdam_exp1",       # Constant filename
                 every_n_train_steps=cfg.checkpoint_freq,
                 save_top_k=1,
                 monitor="test/cluster/mIoU",
