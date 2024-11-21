@@ -16,8 +16,8 @@ use_ddp: False
 #   - "checkpoints/potsdam_dino_vit_base.ckpt"
 # model_paths:
 #   - "/kaggle/input/potsdam_dino_vit_base.ckpt"
-  model_paths:
-   - "/kaggle/working/output/checkpoints/potsdam_exp1.ckpt"
+ model_paths:
+  - "/kaggle/working/output/checkpoints/potsdam_exp1.ckpt"
 
 hydra:
   run:
