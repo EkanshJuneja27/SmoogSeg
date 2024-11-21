@@ -18,5 +18,5 @@ model_paths:
 
 hydra:
   run:
-    dir: "."
-  output_subdir: ~
+    dir: "/kaggle/working/output/"
+  output_subdir: "${hydra.run.dir}/${now:%Y-%m-%d_%H-%M-%S}"
