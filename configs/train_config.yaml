@@ -1,7 +1,7 @@
 output_root: '/kaggle/working/output/'  # Change output directory to Kaggle's working directory
 data_dir: '/kaggle/input/' # Updated path for Potsdam dataset
 experiment_name: "exp1"
-log_dir: "loggs"  # Changed from cityscapes to potsdam
+log_dir: "logs"  # Changed from cityscapes to potsdam
 checkpoint_dir: "checkpts"
 azureml_logging: True
 
