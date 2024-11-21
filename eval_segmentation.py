@@ -241,6 +241,14 @@ def my_app(cfg: DictConfig) -> None:
         tb_metrics = {**model.test_cluster_metrics.compute()}
         print(f"Metrics for {model_path}: {tb_metrics}")
 
+        import json
+
+        # Save metrics to a JSON file
+        metrics_path = join(result_dir, "metrics.json")
+        with open(metrics_path, "w") as f:
+            json.dump(tb_metrics, f)
+        print(f"Metrics saved at {metrics_path}")
+
 if __name__ == "__main__":
     mp.set_start_method('spawn')
     my_app()
