@@ -258,12 +258,12 @@ def my_app(cfg: DictConfig) -> None:
                     
                     # Calculate IoU and store results for each image
                     for idx in range(len(img)):
-                        iou = calculate_iou(cluster_preds[idx], label[idx])
+                        iou = calculate_iou(cluster_preds_avg[idx], label[idx])
                         results.append({
                             'iou': iou,
                             'img': img[idx],
                             'label': label[idx],
-                            'pred': cluster_preds[idx],
+                            'pred': cluster_preds_avg[idx],
                             'idx': len(results)
                         })
 
