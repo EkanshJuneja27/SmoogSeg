@@ -266,7 +266,7 @@ def my_app(cfg: DictConfig) -> None:
                 f'top_{i+1}_iou_{result["iou"]:.3f}',
                 model.label_cmap
             )
-
+        import json
         # Save metrics
         metrics = model.test_cluster_metrics.compute()
         with open(join(results_dir, "metrics.json"), "w") as f:
