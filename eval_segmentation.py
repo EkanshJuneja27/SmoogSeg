@@ -157,9 +157,15 @@ def calculate_iou(pred, label):
 
 def save_result(img, label, pred, save_dir, idx, label_cmap):
     # Create directories
-    os.makedirs(join(save_dir, "original"), exist_ok=True)
-    os.makedirs(join(save_dir, "ground_truth"), exist_ok=True)
-    os.makedirs(join(save_dir, "smooseg"), exist_ok=True)
+    original_dir = join(save_dir, "original")
+    gt_dir = join(save_dir, "ground_truth")
+    pred_dir = join(save_dir, "smooseg")
+    
+    os.makedirs(original_dir, exist_ok=True)
+    os.makedirs(gt_dir, exist_ok=True)
+    os.makedirs(pred_dir, exist_ok=True)
+    
+    print(f"Saving image {idx} to directories:")
     
     # Convert tensors to numpy arrays
     img = img.cpu().numpy().transpose(1, 2, 0)
@@ -188,9 +194,10 @@ def save_result(img, label, pred, save_dir, idx, label_cmap):
 
 @hydra.main(config_path="configs", config_name="eval_config.yaml", version_base='1.1')
 def my_app(cfg: DictConfig) -> None:
-    result_dir = "../results/predictions/{}".format(cfg.experiment_name)
+    results_dir = "/kaggle/working/results"  # Change this line
     os.makedirs(results_dir, exist_ok=True)
-
+    print(f"Created results directory at: {results_dir}")   
+    
     for model_path in cfg.model_paths:
         print(f"Loading model from checkpoint: {model_path}")
         model = LitUnsupervisedSegmenter.load_from_checkpoint(model_path)
@@ -269,6 +276,7 @@ def my_app(cfg: DictConfig) -> None:
 
         # Sort by IoU and save top 10
         results.sort(key=lambda x: x['iou'], reverse=True)
+        print(f"Found {len(results)} total results, saving top 10...")
         for i, result in enumerate(results[:10]):
             save_result(
                 result['img'],
@@ -278,6 +286,8 @@ def my_app(cfg: DictConfig) -> None:
                 f'top_{i+1}_iou_{result["iou"]:.3f}',
                 model.label_cmap
             )
+        # Sort by IoU and save top 10
+
 
         # Compute and print metrics after evaluation
         tb_metrics = {**model.test_cluster_metrics.compute()}
