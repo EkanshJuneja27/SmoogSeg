@@ -231,19 +231,31 @@ def my_app(cfg: DictConfig) -> None:
                     img = batch["img"].cuda()
                     label = batch["label"].cuda()
 
-                    feats = par_model(img)
-                    _, code = par_projection(feats)
-                    code = F.interpolate(code, label.shape[-2:], mode='bilinear', align_corners=False)
-                    _, products = par_prediction(code)
+                    # Original prediction
+                    feats1 = par_model(img)
+                    _, code1 = par_projection(feats1)
+                    code1 = F.interpolate(code1, label.shape[-2:], mode='bilinear', align_corners=False)
+
+                    # Augmented prediction (horizontal flip)
+                    feats2 = par_model(img.flip(dims=[3]))
+                    _, code2 = par_projection(feats2)
+                    code2 = F.interpolate(code2.flip(dims=[3]), label.shape[-2:], mode='bilinear', align_corners=False)
+
+                    # Average predictions from original and augmented inputs
+                    code_avg = (code1 + code2) / 2
+
+                    # Final prediction probabilities and CRF post-processing (if enabled)
+                    _, products_avg = par_prediction(code_avg)
+                    cluster_probs_avg = torch.log_softmax(products_avg * 2, dim=1)
                     
-                    cluster_probs = torch.log_softmax(products * 2, dim=1)
                     if cfg.run_crf:
-                        cluster_preds = batched_crf(pool, img, cluster_probs).argmax(1).cuda()
+                        cluster_preds_avg = batched_crf(pool, img, cluster_probs_avg).argmax(1).cuda()
                     else:
-                        cluster_preds = cluster_probs.argmax(1)
+                        cluster_preds_avg = cluster_probs_avg.argmax(1)
 
-                    model.test_cluster_metrics.update(cluster_preds, label)
-
+                    # Update metrics with predictions and labels
+                    model.test_cluster_metrics.update(cluster_preds_avg, label)
+                    
                     # Calculate IoU and store results for each image
                     for idx in range(len(img)):
                         iou = calculate_iou(cluster_preds[idx], label[idx])
@@ -266,6 +278,11 @@ def my_app(cfg: DictConfig) -> None:
                 f'top_{i+1}_iou_{result["iou"]:.3f}',
                 model.label_cmap
             )
+
+        # Compute and print metrics after evaluation
+        tb_metrics = {**model.test_cluster_metrics.compute()}
+        print(f"Metrics for {model_path}: {tb_metrics}")
+        
         import json
         # Save metrics
         metrics = model.test_cluster_metrics.compute()
