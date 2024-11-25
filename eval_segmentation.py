@@ -188,7 +188,7 @@ def save_result(img, label, pred, save_dir, idx, label_cmap):
 
 @hydra.main(config_path="configs", config_name="eval_config.yaml", version_base='1.1')
 def my_app(cfg: DictConfig) -> None:
-    results_dir = join(cfg.output_root, "results")
+    result_dir = "../results/predictions/{}".format(cfg.experiment_name)
     os.makedirs(results_dir, exist_ok=True)
 
     for model_path in cfg.model_paths:
