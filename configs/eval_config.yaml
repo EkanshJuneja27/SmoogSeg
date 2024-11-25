@@ -3,11 +3,11 @@ data_dir: '/kaggle/input/'
 experiment_name: "validation"
 # res: 320
 res: 224
-batch_size: 32
-num_workers: 2
+batch_size: 16
+num_workers: 4
 run_crf: True
 run_prediction: True
-dark_mode: True
+dark_mode: False
 use_ddp: False
 
 # model_paths:
