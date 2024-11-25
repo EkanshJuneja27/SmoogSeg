@@ -155,42 +155,77 @@ def calculate_iou(pred, label):
     iou = np.sum(intersection) / (np.sum(union) + 1e-10)
     return iou
 
+# def save_result(img, label, pred, save_dir, idx, label_cmap):
+#     # Create directories
+#     original_dir = join(save_dir, "original")
+#     gt_dir = join(save_dir, "ground_truth")
+#     pred_dir = join(save_dir, "smooseg")
+    
+#     os.makedirs(original_dir, exist_ok=True)
+#     os.makedirs(gt_dir, exist_ok=True)
+#     os.makedirs(pred_dir, exist_ok=True)
+    
+#     print(f"Saving image {idx} to directories:")
+    
+#     # Convert tensors to numpy arrays
+#     img = img.cpu().numpy().transpose(1, 2, 0)
+#     img = (img * 255).astype(np.uint8)
+#     label = label.cpu().numpy()
+#     pred = pred.cpu().numpy()
+    
+#     # Save original image
+#     Image.fromarray(img).save(join(save_dir, "original", f'image_{idx}.png'))
+    
+#     # Save ground truth with proper coloring
+#     plt.figure(figsize=(8, 8))
+#     plt.imshow(label_cmap[label])
+#     plt.axis('off')
+#     plt.savefig(join(save_dir, "ground_truth", f'label_{idx}.png'), 
+#                 bbox_inches='tight', pad_inches=0, dpi=150)
+#     plt.close()
+    
+#     # Save prediction with proper coloring
+#     plt.figure(figsize=(8, 8))
+#     plt.imshow(label_cmap[pred])
+#     plt.axis('off')
+#     plt.savefig(join(save_dir, "smooseg", f'pred_{idx}.png'), 
+#                 bbox_inches='tight', pad_inches=0, dpi=150)
+#     plt.close()
+
 def save_result(img, label, pred, save_dir, idx, label_cmap):
     # Create directories
-    original_dir = join(save_dir, "original")
-    gt_dir = join(save_dir, "ground_truth")
-    pred_dir = join(save_dir, "smooseg")
+    os.makedirs(join(save_dir, "original"), exist_ok=True)
+    os.makedirs(join(save_dir, "ground_truth"), exist_ok=True)
+    os.makedirs(join(save_dir, "predictions"), exist_ok=True)
     
-    os.makedirs(original_dir, exist_ok=True)
-    os.makedirs(gt_dir, exist_ok=True)
-    os.makedirs(pred_dir, exist_ok=True)
-    
-    print(f"Saving image {idx} to directories:")
-    
-    # Convert tensors to numpy arrays
+    # Convert tensors to numpy arrays and process original image
     img = img.cpu().numpy().transpose(1, 2, 0)
-    img = (img * 255).astype(np.uint8)
-    label = label.cpu().numpy()
-    pred = pred.cpu().numpy()
+    img = np.clip(img * 255, 0, 255).astype(np.uint8)  # Proper normalization
     
-    # Save original image
+    # Process label and prediction
+    label = label.cpu().numpy().astype(np.uint8)
+    pred = pred.cpu().numpy().astype(np.uint8)
+    
+    # Save original image using PIL for better quality
     Image.fromarray(img).save(join(save_dir, "original", f'image_{idx}.png'))
     
-    # Save ground truth with proper coloring
-    plt.figure(figsize=(8, 8))
-    plt.imshow(label_cmap[label])
-    plt.axis('off')
-    plt.savefig(join(save_dir, "ground_truth", f'label_{idx}.png'), 
-                bbox_inches='tight', pad_inches=0, dpi=150)
-    plt.close()
+    # Create label visualization with proper coloring
+    label_colored = np.zeros_like(img)
+    for class_idx, color in enumerate(label_cmap):
+        mask = label == class_idx
+        label_colored[mask] = color
     
-    # Save prediction with proper coloring
-    plt.figure(figsize=(8, 8))
-    plt.imshow(label_cmap[pred])
-    plt.axis('off')
-    plt.savefig(join(save_dir, "smooseg", f'pred_{idx}.png'), 
-                bbox_inches='tight', pad_inches=0, dpi=150)
-    plt.close()
+    # Create prediction visualization with same coloring scheme
+    pred_colored = np.zeros_like(img)
+    for class_idx, color in enumerate(label_cmap):
+        mask = pred == class_idx
+        pred_colored[mask] = color
+    
+    # Save ground truth and prediction with high quality
+    plt.imsave(join(save_dir, "ground_truth", f'label_{idx}.png'), 
+               label_colored.astype(np.uint8))
+    plt.imsave(join(save_dir, "predictions", f'pred_{idx}.png'), 
+               pred_colored.astype(np.uint8))
 
 @hydra.main(config_path="configs", config_name="eval_config.yaml", version_base='1.1')
 def my_app(cfg: DictConfig) -> None:
