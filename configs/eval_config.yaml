@@ -1,22 +1,26 @@
-output_root: '../'
+output_root: '/kaggle/working/output/'
 data_dir: '/kaggle/input/'
 experiment_name: "validation"
-res: 320
-batch_size: 32
-num_workers: 2
+# res: 320
+res: 224
+batch_size: 16
+num_workers: 4
 run_crf: True
 run_prediction: True
-dark_mode: True
+dark_mode: False
 use_ddp: False
 
-#model_paths:
+# model_paths:
 #  - "checkpoints/cocostuff27_dino_small.ckpt"
- # - "checkpoints/cityscapes_dino_small.ckpt"
+#  - "checkpoints/cityscapes_dino_small.ckpt"
 #   - "checkpoints/potsdam_dino_vit_base.ckpt"
+# model_paths:
+#   - "/kaggle/input/potsdam_dino_vit_base.ckpt"
+
 model_paths:
-  - "/kaggle/input/potsdam_dino_vit_base.ckpt"
+ - "/kaggle/working/output/checkpoints/potsdam_exp1.ckpt"
 
 hydra:
   run:
-    dir: "."
-  output_subdir: ~
+    dir: "/kaggle/working/output/"
+  output_subdir: "${hydra.run.dir}/${now:%Y-%m-%d_%H-%M-%S}"

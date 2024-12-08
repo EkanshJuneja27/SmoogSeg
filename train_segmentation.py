@@ -109,7 +109,9 @@ class LitUnsupervisedSegmenter(pl.LightningModule):
             {'params': list(self.projection.parameters()), 'lr': self.cfg.lr1, 'weight_decay': 1e-5},
             {'params': list(self.prediction.parameters()), 'lr': self.cfg.lr2, 'weight_decay': 1e-5}
         ])
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+        def poly_lr_scheduler(step, max_steps, power=2.0):
+            return (1-step/max_steps)**power
+        scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda step: poly_lr_scheduler(step, self.cfg.max_steps))
         return [optimizer], [scheduler]
 
     def on_train_start(self):
@@ -277,7 +279,8 @@ def my_app(cfg: DictConfig) -> None:
         precision=16,
         callbacks=[
             ModelCheckpoint(
-                dirpath=join(checkpoint_dir, name),
+                dirpath=join(checkpoint_dir),  # Directory for saving checkpoints
+                filename="potsdam_exp1",       # Constant filename
                 every_n_train_steps=cfg.checkpoint_freq,
                 save_top_k=1,
                 monitor="test/cluster/mIoU",
