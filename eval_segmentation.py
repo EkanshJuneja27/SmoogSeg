@@ -342,7 +342,7 @@ def my_app(cfg: DictConfig) -> None:
     os.makedirs(join(save_dir, "prediction"), exist_ok=True)
 
     print("Loading test indices...")
-    with open('/kaggle/input/potsdam/potsdam/labelled_test.txt', 'r') as f:
+    with open('/kaggle/input/potsdam/labelled_test.txt', 'r') as f:
         test_indices = [line.strip() for line in f.readlines()]
     print(f"Found {len(test_indices)} test images")
 
