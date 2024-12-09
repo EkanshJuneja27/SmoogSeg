@@ -1,5 +1,5 @@
 output_root: '/kaggle/working/output/'
-data_dir: '/kaggle/input/potsdam'
+data_dir: '/kaggle/input/'
 experiment_name: "validation"
 # res: 320
 res: 224
