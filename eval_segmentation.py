@@ -346,11 +346,6 @@ def my_app(cfg: DictConfig) -> None:
     os.makedirs(join(save_dir, "ground_truth"), exist_ok=True)
     os.makedirs(join(save_dir, "prediction"), exist_ok=True)
 
-    print("Loading test indices...")
-    with open('/kaggle/input/potsdam/labelled_test.txt', 'r') as f:
-        test_indices = [line.strip() for line in f.readlines()]
-    print(f"Found {len(test_indices)} test images")
-
     for model_path in cfg.model_paths:
         print(f"Loading model from checkpoint: {model_path}")
         model = LitUnsupervisedSegmenter.load_from_checkpoint(model_path)
@@ -416,26 +411,19 @@ def my_app(cfg: DictConfig) -> None:
 
                     # Save images for each item in batch
 
-                    # Add these print statements in the main loop
-                    # Add this before the processing loop
-                    
-                    print("Colormap shape:", model.label_cmap.shape)
-                    print("Colormap values:", model.label_cmap)
-
                     for b in range(img.shape[0]):
-                        img_name = image_index[b]
+                        # img_name = image_index[b]
+                        img_name = f"{i * cfg.batch_size + b:04d}" 
                         print(f"Processing image {img_name}, type: {type(img_name)}")
-                        print(f"Test indices: {test_indices[:5]}...")  # Print first 5 indices
-                        if img_name in test_indices:
-                            print(f"Saving image {img_name}")
-                            save_segmentation_images(
-                                img[b],
-                                label[b],
-                                cluster_preds[b],
-                                save_dir,
-                                img_name,
-                                model.label_cmap
-                            )
+                        print(f"Saving image {img_name}")
+                        save_segmentation_images(
+                            img[b],
+                            label[b],
+                            cluster_preds[b],
+                            save_dir,
+                            img_name,
+                            model.label_cmap
+                        )
 
                     # Update metrics
                     model.test_cluster_metrics.update(cluster_preds, label)
