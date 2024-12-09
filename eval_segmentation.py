@@ -259,13 +259,15 @@ def my_app(cfg: DictConfig) -> None:
 
                     # Save images for each item in batch
                     for b in range(img.shape[0]):
-                        if str(image_index[b].item()) in test_dataset.dataset.files:
+                        # Handle image index as string directly
+                        img_name = image_index[b]
+                        if img_name in test_dataset.dataset.files:
                             save_segmentation_images(
                                 img[b],
                                 label[b],
                                 cluster_preds[b],
                                 save_dir,
-                                image_index[b].item(),
+                                img_name,
                                 model.label_cmap
                             )
 
