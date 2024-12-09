@@ -316,6 +316,11 @@ def batched_crf(pool, img_tensor, prob_tensor):
 def save_segmentation_images(img, label, pred, save_dir, filename, colormap):
     """Save original, ground truth and predicted segmentation images"""
     try:
+        # Create directories if they don't exist
+        os.makedirs(join(save_dir, "original"), exist_ok=True)
+        os.makedirs(join(save_dir, "ground_truth"), exist_ok=True)
+        os.makedirs(join(save_dir, "prediction"), exist_ok=True)
+        
         # Convert and save original image
         img_np = img.cpu().numpy().transpose(1, 2, 0)
         img_np = np.clip(img_np * 255, 0, 255).astype(np.uint8)
@@ -410,9 +415,19 @@ def my_app(cfg: DictConfig) -> None:
                         cluster_preds = cluster_probs.argmax(1)
 
                     # Save images for each item in batch
+
+                    # Add these print statements in the main loop
+                    # Add this before the processing loop
+                    
+                    print("Colormap shape:", model.label_cmap.shape)
+                    print("Colormap values:", model.label_cmap)
+
                     for b in range(img.shape[0]):
                         img_name = image_index[b]
+                        print(f"Processing image {img_name}, type: {type(img_name)}")
+                        print(f"Test indices: {test_indices[:5]}...")  # Print first 5 indices
                         if img_name in test_indices:
+                            print(f"Saving image {img_name}")
                             save_segmentation_images(
                                 img[b],
                                 label[b],
