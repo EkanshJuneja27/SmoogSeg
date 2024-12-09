@@ -1,5 +1,5 @@
 output_root: '/kaggle/working/output/'
-data_dir: '/kaggle/input/'
+data_dir: '/kaggle/input/potsdam'
 experiment_name: "validation"
 # res: 320
 res: 224
@@ -10,15 +10,8 @@ run_prediction: True
 dark_mode: False
 use_ddp: False
 
-# model_paths:
-#  - "checkpoints/cocostuff27_dino_small.ckpt"
-#  - "checkpoints/cityscapes_dino_small.ckpt"
-#   - "checkpoints/potsdam_dino_vit_base.ckpt"
-# model_paths:
-#   - "/kaggle/input/potsdam_dino_vit_base.ckpt"
-
 model_paths:
- - "/kaggle/working/output/checkpoints/potsdam_exp1.ckpt"
+ - "/kaggle/input/potsdam_exp1.ckpt"
 
 hydra:
   run:
