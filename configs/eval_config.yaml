@@ -11,7 +11,7 @@ dark_mode: False
 use_ddp: False
 
 model_paths:
- - "/kaggle/input/potsdam_exp1.ckpt"
+ - "/kaggle/input/potsdam-exp1-ckpt/potsdam_exp1.ckpt"
 
 hydra:
   run:
