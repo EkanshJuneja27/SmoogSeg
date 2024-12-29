@@ -324,7 +324,10 @@ def save_segmentation_images(img, label, pred, save_dir, filename, colormap):
         # Convert and save original image
         img_np = img.cpu().numpy().transpose(1, 2, 0)
         img_np = np.clip(img_np * 255, 0, 255).astype(np.uint8)
+        if img_np.shape[2] > 3:
+            img_np = img_np[:, :, :3]
         Image.fromarray(img_np).save(join(save_dir, "original", f"{filename}.png"))
+
         
         # Convert and save ground truth and prediction
         for data, folder in [(label, "ground_truth"), (pred, "prediction")]:
