@@ -149,7 +149,6 @@
 # if __name__ == "__main__":
 #     mp.set_start_method('spawn')
 #     my_app()
-
 from modules import *
 from data import *
 from collections import defaultdict
@@ -183,31 +182,42 @@ def save_segmentation_images(img, label, pred, save_dir, filename, colormap):
         os.makedirs(join(save_dir, "ground_truth"), exist_ok=True)
         os.makedirs(join(save_dir, "prediction"), exist_ok=True)
         
-        # Save original image with proper RGB values
+        # Save original image with correct RGB values
         img_np = img.cpu().numpy().transpose(1, 2, 0)
-        # Scale to 0-255 without clipping to preserve brightness
-        img_np = (img_np * 255).astype(np.uint8)
+        # Denormalize image
+        mean = np.array([0.485, 0.456, 0.406])
+        std = np.array([0.229, 0.224, 0.225])
+        img_np = std * img_np + mean
+        img_np = np.clip(img_np * 255, 0, 255).astype(np.uint8)
         if img_np.shape[2] > 3:
             img_np = img_np[:, :, :3]
         Image.fromarray(img_np).save(join(save_dir, "original", f"{filename}.png"))
         
-        # Fixed colormap for Potsdam dataset
-        fixed_colormap = np.array([
-            [68, 1, 84],      # Purple
-            [33, 145, 140],   # Turquoise
-            [253, 231, 37]    # Yellow
-        ])
+        # Get Potsdam colormap
+        potsdam_colormap = create_potsdam_colormap()
         
-        # Save ground truth and prediction with correct colors
-        for data, folder in [(label, "ground_truth"), (pred, "prediction")]:
-            seg_np = data.cpu().numpy()
-            colored_seg = np.zeros((seg_np.shape[0], seg_np.shape[1], 3), dtype=np.uint8)
+        # Save ground truth with original colors
+        seg_np = label.cpu().numpy()
+        colored_seg = np.zeros((seg_np.shape[0], seg_np.shape[1], 3), dtype=np.uint8)
+        for class_idx in range(len(potsdam_colormap)):
+            mask = (seg_np == class_idx)
+            colored_seg[mask] = potsdam_colormap[class_idx]
+        Image.fromarray(colored_seg).save(join(save_dir, "ground_truth", f"{filename}.png"))
+        
+        # Save prediction with swapped colors (purple and turquoise)
+        pred_np = pred.cpu().numpy()
+        colored_pred = np.zeros((pred_np.shape[0], pred_np.shape[1], 3), dtype=np.uint8)
+        
+        # Create swapped colormap for predictions
+        swapped_colormap = potsdam_colormap.copy()
+        swapped_colormap[0] = potsdam_colormap[1]  # Turquoise
+        swapped_colormap[1] = potsdam_colormap[0]  # Purple
+        
+        for class_idx in range(len(swapped_colormap)):
+            mask = (pred_np == class_idx)
+            colored_pred[mask] = swapped_colormap[class_idx]
             
-            for class_idx in range(len(fixed_colormap)):
-                mask = (seg_np == class_idx)
-                colored_seg[mask] = fixed_colormap[class_idx]
-            
-            Image.fromarray(colored_seg).save(join(save_dir, folder, f"{filename}.png"))
+        Image.fromarray(colored_pred).save(join(save_dir, "prediction", f"{filename}.png"))
             
     except Exception as e:
         print(f"Error saving images for {filename}: {str(e)}")
@@ -216,7 +226,6 @@ def save_segmentation_images(img, label, pred, save_dir, filename, colormap):
 def my_app(cfg: DictConfig) -> None:
     save_dir = "/kaggle/working/potsdam_results"
     os.makedirs(save_dir, exist_ok=True)
-     
 
     for model_path in cfg.model_paths:
         print(f"Loading model from checkpoint: {model_path}")
@@ -250,12 +259,6 @@ def my_app(cfg: DictConfig) -> None:
             num_workers=cfg.num_workers,
             pin_memory=True
         )
-        # Fixed colormap for Potsdam dataset
-        fixed_colormap = np.array([
-            [68, 1, 84],      # Purple
-            [33, 145, 140],   # Turquoise
-            [253, 231, 37]    # Yellow
-        ])
 
         with Pool(cfg.num_workers + 5) as pool:
             for i, batch in enumerate(tqdm(test_loader)):
@@ -289,7 +292,7 @@ def my_app(cfg: DictConfig) -> None:
                             cluster_preds[b],
                             save_dir,
                             img_name,
-                            fixed_colormap
+                            create_potsdam_colormap()
                         )
 
                     model.test_cluster_metrics.update(cluster_preds, label)
@@ -300,4 +303,3 @@ def my_app(cfg: DictConfig) -> None:
 if __name__ == "__main__":
     mp.set_start_method('spawn')
     my_app()
-
