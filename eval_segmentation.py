@@ -216,6 +216,7 @@ def save_segmentation_images(img, label, pred, save_dir, filename, colormap):
 def my_app(cfg: DictConfig) -> None:
     save_dir = "/kaggle/working/potsdam_results"
     os.makedirs(save_dir, exist_ok=True)
+     
 
     for model_path in cfg.model_paths:
         print(f"Loading model from checkpoint: {model_path}")
@@ -249,6 +250,12 @@ def my_app(cfg: DictConfig) -> None:
             num_workers=cfg.num_workers,
             pin_memory=True
         )
+        # Fixed colormap for Potsdam dataset
+        fixed_colormap = np.array([
+            [68, 1, 84],      # Purple
+            [33, 145, 140],   # Turquoise
+            [253, 231, 37]    # Yellow
+        ])
 
         with Pool(cfg.num_workers + 5) as pool:
             for i, batch in enumerate(tqdm(test_loader)):
